@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JQuery Student Registration Form</title>
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      width: 100vw;
+      background: #0d0d19;
+      color: #ffffff;
+      overflow: hidden; 
+    }
+
+    .main-container { position: relative; width: 100vw; height: 100vh; background: #1a1a2e; overflow: hidden; }
+    .form-wrapper {
+      position: absolute;
+      top: 0; left: 0;
+      width: 200vw; height: 100%;
+      display: flex;
+      transition: transform 1s ease-in-out;
+      z-index: 5;
+      transform: translateX(0vw);
+    }
+
+    .main-container .form-box {
+      width: 45vw; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 5vw;
+      background: transparent;
+      transition: opacity .5s ease;
+    }
+
+    .form-box.form-step-1 { opacity: 1; pointer-events: auto; }
+    .form-box.form-step-2 { opacity: 0.5; pointer-events: none; margin-left: 53%; }
+
+    .input-box { position: relative; width: 100%; height: 7vh; margin: 2vh 0; }
+    .input-box input, .input-box select {
+      width: 100%; height: 100%; background: transparent; border: none;
+      outline: none; border-bottom: 2px solid #fff; font-size: 1rem; color: #fff;
+      padding: 0 2vw 0 0.5vw;
+    }
+    .input-box label {
+      position: absolute; top: 50%; left: 0.5vw; transform: translateY(-50%);
+      font-size: 1rem; color: rgba(255,255,255,0.8); pointer-events: none; transition: 0.3s;
+    }
+    .input-box input:focus ~ label,
+.input-box input:valid ~ label,
+.input-box select:valid ~ label {
+  top: -1vh;
+  font-size: 0.9rem;
+  color: #b56dff;
+}
+
+
+    .input-box i { position: absolute; top: 50%; right: 0.5vw; transform: translateY(-50%); font-size: 1.3rem; color: #fff; }
+
+    .btn {
+      width: 95%; height: 7vh; background: linear-gradient(to right, #6a0dad, #9932cc);
+      border: none; outline: none; border-radius: 40px; cursor: pointer;
+      font-size: 1rem; color: #fff; font-weight: 600; margin: 2vh 0; transition: .3s;
+    }
+    .btn:hover {
+      background: linear-gradient(90deg, #b56dff, #7e3ff2);
+      box-shadow: 0 0 10px rgba(160, 80, 255, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .select-box { position: static; margin-top: 2vh; display: flex; flex-direction: column; }
+    .select-box label { position: static; font-size: 1rem; margin-bottom: 0.5vh; color: rgba(255,255,255,0.8); transform: none; }
+    .select-box select { border: none; border-bottom: 2px solid #fff; background: transparent; color: #fff; font-size: 1rem; width: 100%; padding: 0.8vh 0; outline: none; }
+    .select-box select option { background: #1a1a2e; color: #fff; }
+
+    .info-side {
+      position: absolute; top: 0; right: 0; width: 45vw; height: 100%;
+      background: rgba(75, 0, 130, 0.3); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      transform: skewX(-10deg); transform-origin: top left; transition: 1s ease-in-out; z-index: 20;
+      border-left: 1px solid rgba(255,255,255,0.2);
+    }
+    .info-side .info-content {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 5vw; text-align: center;
+      transform: skewX(10deg);
+    }
+    .info-side .info-content h1 {
+      font-size: 3vw; font-weight: 800;
+      background: linear-gradient(90deg, #d8b4ff, #b56dff, #8a2be2);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2vh;
+    }
+    .info-side .info-content p { font-size: 1.1rem; color: rgba(255,255,255,0.8); margin-bottom: 5vh; }
+    .info-side .info-content.step-2-info { opacity: 0; pointer-events: none; }
+
+    .main-container.active .form-wrapper { transform: translateX(-100vw); }
+    .main-container.active .info-side { right: 50vw; }
+    .main-container.active .form-box.form-step-2 { opacity: 1; pointer-events: auto; transition-delay: .7s; }
+    .main-container.active .form-box.form-step-1 { opacity: 0.5; pointer-events: none; transition-delay: 0s; }
+    .main-container.active .info-content.step-2-info { opacity: 1; pointer-events: auto; transition: opacity .5s ease .7s; }
+    .main-container.active .info-content.step-1-info { opacity: 0; pointer-events: none; transition: opacity 0s; }
+
+    @media (max-width: 768px) {
+      .main-container .form-box, .info-side { width: 100vw; transform: none; border: none; }
+      .info-side { display: none; }
+      .form-box { padding: 10vw; width: 100%; }
+      .form-box h2 { font-size: 1.5rem; text-align: center; margin-bottom: 2vh; }
+      .btn { font-size: 1rem; height: 6vh; }
+    }
+
+    .success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.5); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  z-index: 50;
+}
+
+.success-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.success-message h1 {
+  font-size: 3vw;
+  font-weight: 800;
+  text-align: center;
+  background: linear-gradient(90deg, #d8b4ff, #b56dff, #8a2be2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.success-details {
+  margin-top: 2vh;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .success-message h1 { font-size: 5vw; }
+  .success-details { font-size: 0.9rem; }
+}
+
+.success-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  justify-content: center;
+  gap: 2vh; 
+}
+
+.success-message .btn {
+  width: 50%;
+  max-width: 200px;
+  text-align: center;
+}
+
+.panel-footer {
+  position: absolute;
+  bottom: 1rem;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  opacity: 0.9;
+}
+
+.panel-footer span {
+  color: #d8b4ff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.shake {
+  animation: shake 0.3s;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-4px); }
+  100% { transform: translateX(0); }
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <div class="form-wrapper">
+
+      <!-- STEP 1 -->
+<div class="form-box form-step-1">
+  <h2>Step 1: Personal Info</h2>
+  <form id="form1">
+    <div class="input-box">
+      <input type="text" id="fname" name="fname" required>
+      <label for="fname">First Name</label>
+      <i class="bx bxs-user"></i>
+    </div>
+    <div class="input-box">
+      <input type="text" id="lname" name="lname" required>
+      <label for="lname">Last Name</label>
+      <i class="bx bxs-user"></i>
+    </div>
+    <div class="input-box">
+  <input type="email" id="email" name="email" required placeholder=" ">
+  <label for="email">Email</label>
+  <i class="bx bxs-envelope"></i>
+</div>
+
+    <div class="input-box">
+      <input type="number" id="age" name="age" min="1" max="120" required>
+      <label for="age">Age</label>
+      <i class="bx bxs-calendar"></i>
+    </div>
+
+    <div class="input-box select-box">
+      <label for="gender">Gender:</label>
+      <select id="gender" name="gender" required>
+        <option value="" disabled selected>Select Gender</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="others">Other</option>
+      </select>
+    </div>
+
+    <button type="reset" class="btn">Reset</button>
+  </form>
+</div>
+
+
+      <!-- STEP 2 -->
+      <div class="form-box form-step-2">
+        <h2>Step 2: Academic Info</h2>
+        <form id="form2">
+          <div class="input-box select-box">
+            <label for="course">Select Program:</label>
+            <select id="course" name="course" required>
+              <option value="" disabled selected>Select</option>
+              <option value="ics">ICS</option>
+              <option value="ite">ITE</option>
+              <option value="ibe">IBE</option>
+            </select>
+          </div>
+
+          <div class="input-box select-box">
+            <label for="section">Section:</label>
+            <select id="section" name="section" required>
+              <option value="" disabled selected>Select</option>
+              <option value="2A">2A</option>
+              <option value="2B">2B</option>
+              <option value="2C">2C</option>
+              <option value="2D">2D</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn">Submit</button>
+          <button type="reset" class="btn">Reset</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- INFO SIDE -->
+   <div class="info-side">
+  <div class="info-content step-1-info">
+    <h1>WELCOME!</h1>
+    <p>Enter your personal details to begin the registration process.</p>
+    <button class="btn next-step-link">NEXT</button>
+  </div>
+  <div class="info-content step-2-info">
+    <h1>Almost Done!</h1>
+    <p>Complete your academic details to finish your registration.</p>
+    <button class="btn prev-step-link">BACK</button>
+  </div>
+
+  <footer class="panel-footer">
+    <p>Made by:</p> 
+    <span>Kurt Russel Cerzo</span></p>
+    <span>Cherrylyn Quebalayan</span></p>
+    <span>Meia Coprade</span></p>
+  </footer>
+</div>
+
+<div class="success-overlay" id="successOverlay">
+  <div class="success-message">
+    <h1>YOU HAVE BEEN SUCCESSFULLY REGISTERED</h1>
+    <div class="success-details" id="successDetails"></div>
+    <button class="btn" id="backButton">BACK</button>
+  </div>
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  const mainContainer = document.querySelector('.main-container');
+  const nextStepLink = document.querySelector('.next-step-link');
+  const prevStepLink = document.querySelector('.prev-step-link');
+
+  const form1 = document.getElementById('form1');
+  const form2 = document.getElementById('form2');
+
+  const successOverlay = document.getElementById('successOverlay');
+  const successDetails = document.getElementById('successDetails');
+  const backButton = document.getElementById('backButton');
+
+  nextStepLink.addEventListener('click', e => {
+    e.preventDefault();
+    const inputs = Array.from(form1.querySelectorAll('input, select'));
+    const allValid = inputs.every(input => input.checkValidity());
+    if (allValid) {
+      mainContainer.classList.add('active');
+    } else {
+      inputs.forEach(input => {
+        if (!input.checkValidity()) input.reportValidity();
+      });
+    }
+  });
+
+  prevStepLink.addEventListener('click', e => {
+    e.preventDefault();
+    mainContainer.classList.remove('active');
+  });
+
+  document.querySelectorAll('input, select').forEach((input, index, inputs) => {
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const next = inputs[index + 1];
+        if (next) next.focus();
+        else input.form?.requestSubmit();
+      }
+    });
+  });
+
+  form2.addEventListener('submit', e => {
+    e.preventDefault();
+    const fname = form1.fname.value;
+    const lname = form1.lname.value;
+    const email = form1.email.value;
+    const age = form1.age.value;
+    const gender = form1.gender.value;
+    const course = form2.course.value;
+    const section = form2.section.value;
+
+    successDetails.innerHTML = `
+      <p><strong>First Name:</strong> ${fname}</p>
+      <p><strong>Last Name:</strong> ${lname}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Age:</strong> ${age}</p>
+      <p><strong>Gender:</strong> ${gender}</p>
+      <p><strong>Program:</strong> ${course}</p>
+      <p><strong>Section:</strong> ${section}</p>
+    `;
+
+    successOverlay.classList.add('active');
+  });
+
+ backButton.addEventListener('click', () => {
+  successOverlay.classList.remove('active');
+  mainContainer.classList.remove('active');
+
+  form1.reset();
+  form2.reset();
+
+  $("input, select").css("border-bottom", "2px solid #fff");
+  $("label").css("color", "rgba(255,255,255,0.8)");
+});
+
+
+
+  $(document).ready(function() {
+    $("input, select").css({
+      "transition": "border-color 0.3s ease, color 0.3s ease"
+    });
+    $("label").css({
+      "transition": "color 0.3s ease"
+    });
+
+    function validateField(field) {
+      const $field = $(field);
+      const value = $field.val().trim();
+      if (value === "" || !$field[0].checkValidity()) {
+        $field.css("border-bottom", "2px solid red");
+        $field.siblings("label").css("color", "red");
+        // 🔥 Optional: small shake animation on invalid
+        $field.parent().addClass("shake");
+        setTimeout(() => $field.parent().removeClass("shake"), 300);
+      } else {
+        $field.css("border-bottom", "2px solid #00ff66");
+        $field.siblings("label").css("color", "#00ff66");
+      }
+    }
+
+    $("input, select").on("input change blur", function() {
+      validateField(this);
+    });
+
+    $("form").on("submit", function() {
+      $(this).find("input, select").each(function() {
+        validateField(this);
+      });
+    });
+  });
+</script>
+
+
+</body>
+</html>  
