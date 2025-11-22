@@ -202,6 +202,19 @@
   100% { transform: translateX(0); }
 }
 
+.valid {
+  border-bottom: 2px solid #00ff66 !important;
+}
+.invalid {
+  border-bottom: 2px solid red !important;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+  display: none;
+}
 
   </style>
 </head>
@@ -314,116 +327,131 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  const mainContainer = document.querySelector('.main-container');
-  const nextStepLink = document.querySelector('.next-step-link');
-  const prevStepLink = document.querySelector('.prev-step-link');
+const mainContainer = document.querySelector('.main-container');
+const nextStepLink = document.querySelector('.next-step-link');
+const prevStepLink = document.querySelector('.prev-step-link');
+const form1 = document.getElementById('form1');
+const form2 = document.getElementById('form2');
+const successOverlay = document.getElementById('successOverlay');
+const successDetails = document.getElementById('successDetails');
+const backButton = document.getElementById('backButton');
 
-  const form1 = document.getElementById('form1');
-  const form2 = document.getElementById('form2');
+nextStepLink.addEventListener('click', e => {
+  e.preventDefault();
+  const inputs = Array.from(form1.querySelectorAll('input, select'));
+  const allValid = inputs.every(input => input.checkValidity());
+  if (allValid) {
+    mainContainer.classList.add('active');
+  } else {
+    inputs.forEach(input => {
+      if (!input.checkValidity()) input.reportValidity();
+    });
+  }
+});
 
-  const successOverlay = document.getElementById('successOverlay');
-  const successDetails = document.getElementById('successDetails');
-  const backButton = document.getElementById('backButton');
+prevStepLink.addEventListener('click', e => {
+  e.preventDefault();
+  mainContainer.classList.remove('active');
+});
 
-  nextStepLink.addEventListener('click', e => {
-    e.preventDefault();
-    const inputs = Array.from(form1.querySelectorAll('input, select'));
-    const allValid = inputs.every(input => input.checkValidity());
-    if (allValid) {
-      mainContainer.classList.add('active');
-    } else {
-      inputs.forEach(input => {
-        if (!input.checkValidity()) input.reportValidity();
-      });
+document.querySelectorAll('input, select').forEach((input, index, inputs) => {
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const next = inputs[index + 1];
+      if (next) next.focus();
+      else input.form?.requestSubmit();
     }
   });
+});
 
-  prevStepLink.addEventListener('click', e => {
-    e.preventDefault();
-    mainContainer.classList.remove('active');
-  });
+form2.addEventListener('submit', e => {
+  e.preventDefault();
+  const fname = form1.fname.value;
+  const lname = form1.lname.value;
+  const email = form1.email.value;
+  const age = form1.age.value;
+  const gender = form1.gender.value;
+  const course = form2.course.value;
+  const section = form2.section.value;
 
-  document.querySelectorAll('input, select').forEach((input, index, inputs) => {
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const next = inputs[index + 1];
-        if (next) next.focus();
-        else input.form?.requestSubmit();
-      }
-    });
-  });
+  successDetails.innerHTML = `
+    <p><strong>First Name:</strong> ${fname}</p>
+    <p><strong>Last Name:</strong> ${lname}</p>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Age:</strong> ${age}</p>
+    <p><strong>Gender:</strong> ${gender}</p>
+    <p><strong>Program:</strong> ${course}</p>
+    <p><strong>Section:</strong> ${section}</p>
+  `;
 
-  form2.addEventListener('submit', e => {
-    e.preventDefault();
-    const fname = form1.fname.value;
-    const lname = form1.lname.value;
-    const email = form1.email.value;
-    const age = form1.age.value;
-    const gender = form1.gender.value;
-    const course = form2.course.value;
-    const section = form2.section.value;
+  successOverlay.classList.add('active');
+});
 
-    successDetails.innerHTML = `
-      <p><strong>First Name:</strong> ${fname}</p>
-      <p><strong>Last Name:</strong> ${lname}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Age:</strong> ${age}</p>
-      <p><strong>Gender:</strong> ${gender}</p>
-      <p><strong>Program:</strong> ${course}</p>
-      <p><strong>Section:</strong> ${section}</p>
-    `;
-
-    successOverlay.classList.add('active');
-  });
-
- backButton.addEventListener('click', () => {
+backButton.addEventListener('click', () => {
   successOverlay.classList.remove('active');
   mainContainer.classList.remove('active');
-
   form1.reset();
   form2.reset();
-
+  $("input, select").removeClass("valid invalid");
+  $(".error-message").text("").hide();
   $("input, select").css("border-bottom", "2px solid #fff");
   $("label").css("color", "rgba(255,255,255,0.8)");
 });
 
-
-
-  $(document).ready(function() {
-    $("input, select").css({
-      "transition": "border-color 0.3s ease, color 0.3s ease"
-    });
-    $("label").css({
-      "transition": "color 0.3s ease"
-    });
-
-    function validateField(field) {
-      const $field = $(field);
-      const value = $field.val().trim();
-      if (value === "" || !$field[0].checkValidity()) {
-        $field.css("border-bottom", "2px solid red");
-        $field.siblings("label").css("color", "red");
-        // 🔥 Optional: small shake animation on invalid
-        $field.parent().addClass("shake");
-        setTimeout(() => $field.parent().removeClass("shake"), 300);
-      } else {
-        $field.css("border-bottom", "2px solid #00ff66");
-        $field.siblings("label").css("color", "#00ff66");
-      }
+$(document).ready(function(){
+  $(".input-box").each(function(){
+    if ($(this).find(".error-message").length === 0) {
+      $(this).append('<div class="error-message"></div>');
     }
-
-    $("input, select").on("input change blur", function() {
-      validateField(this);
-    });
-
-    $("form").on("submit", function() {
-      $(this).find("input, select").each(function() {
-        validateField(this);
-      });
-    });
   });
+
+  $("input, select").on("keyup blur change", function(){
+    const $field = $(this);
+    const value = $field.val().trim();
+    const $error = $field.siblings(".error-message");
+
+    if (value === "") {
+      $field.removeClass("valid").addClass("invalid");
+      $error.text("This field is required").fadeIn(200);
+    } else if ($field.attr("type") === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      $field.removeClass("valid").addClass("invalid");
+      $error.text("Please enter a valid email").fadeIn(200);
+    } else {
+      $field.removeClass("invalid").addClass("valid");
+      $error.text("").fadeOut(200);
+    }
+  });
+
+  $("form").on("submit", function(e){
+    let hasError = false;
+    $(this).find("input, select").each(function(){
+      const $field = $(this);
+      const value = $field.val().trim();
+      const $error = $field.siblings(".error-message");
+      if (value === "") {
+        $field.removeClass("valid").addClass("invalid");
+        $error.text("This field is required").show();
+        hasError = true;
+      }
+    });
+    if (hasError) {
+      e.preventDefault();
+      alert("Please fill in all required fields before submitting!");
+    }
+  });
+
+  $("form").on("reset", function(){
+    $(this).find("input, select").removeClass("valid invalid");
+    $(this).find(".error-message").text("").hide();
+  });
+});
 </script>
+
+
+</body>
+</html>
+
 
 
 </body>
